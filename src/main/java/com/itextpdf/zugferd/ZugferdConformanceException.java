@@ -42,7 +42,7 @@
  */
 package com.itextpdf.zugferd;
 
-import com.itextpdf.pdfa.PdfAConformanceException;
+import com.itextpdf.pdfa.exceptions.PdfAConformanceException;
 
 /**
  * The ZUGFeRD conformance exception class.

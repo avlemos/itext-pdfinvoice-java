@@ -42,7 +42,7 @@
  */
 package com.itextpdf.zugferd.exceptions;
 
-import com.itextpdf.io.util.MessageFormatUtil;
+import java.text.MessageFormat;
 
 /**
  * This exception is thrown when you try to create a ZUGFeRD XML file
@@ -59,6 +59,6 @@ public class DataIncompleteException extends Exception {
      * @param tag the tag
      */
     public DataIncompleteException(String tag) {
-        super(MessageFormatUtil.format("The data is missing: {0}", tag));
+        super(MessageFormat.format("The data is missing: {0}", tag));
     }
 }

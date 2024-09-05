@@ -42,7 +42,7 @@
  */
 package com.itextpdf.zugferd;
 
-import com.itextpdf.kernel.PdfException;
+import com.itextpdf.kernel.exceptions.PdfException;
 import com.itextpdf.kernel.pdf.PdfDictionary;
 import com.itextpdf.kernel.pdf.PdfName;
 import com.itextpdf.kernel.xmp.XMPException;

@@ -42,12 +42,8 @@
  */
 package com.itextpdf.zugferd;
 
-import com.itextpdf.io.LogMessageConstant;
-import com.itextpdf.io.util.MessageFormatUtil;
-import com.itextpdf.kernel.counter.EventCounterHandler;
-import com.itextpdf.kernel.counter.event.IMetaInfo;
-import com.itextpdf.kernel.log.CounterManager;
-import com.itextpdf.kernel.log.ICounter;
+import com.itextpdf.io.logs.IoLogMessageConstant;
+import com.itextpdf.commons.actions.contexts.IMetaInfo;
 import com.itextpdf.kernel.pdf.DocumentProperties;
 import com.itextpdf.kernel.pdf.PdfAConformanceLevel;
 import com.itextpdf.kernel.pdf.PdfOutputIntent;
@@ -58,19 +54,13 @@ import com.itextpdf.kernel.xmp.XMPMetaFactory;
 import com.itextpdf.kernel.xmp.XMPUtils;
 import com.itextpdf.pdfa.PdfADocument;
 
-import com.itextpdf.zugferd.events.PdfInvoiceEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.Array;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
-import java.util.List;
-
-import com.itextpdf.kernel.Version;
+import java.text.MessageFormat;
 
 /**
- * ZUGFeRD documents need to be PDF/A-3 compliant. This class inherits from the iText 7 {@link PdfADocument} implementation
+ * ZUGFeRD documents need to be PDF/A-3 compliant. This class inherits from the iText {@link PdfADocument} implementation
  * for convenience. The PdfADocument class will handle all of the PDF/A-3 compliance, while this class will handle the
  * ZUGFeRD compliance.
  */
@@ -90,43 +80,7 @@ public class ZugferdDocument extends PdfADocument {
      */
     public ZugferdDocument(PdfWriter writer, ZugferdProperties properties) {
         super(writer, getPdfAConformanceLevel(properties), properties.pdfOutputIntent, new DocumentProperties().setEventCountingMetaInfo(new ZugferdMetaInfo()));
-        String licenseKeyClassName = "com.itextpdf.licensekey.LicenseKey";
-        String licenseKeyProductClassName = "com.itextpdf.licensekey.LicenseKeyProduct";
-        String licenseKeyFeatureClassName = "com.itextpdf.licensekey.LicenseKeyProductFeature";
-        String checkLicenseKeyMethodName = "scheduledCheck";
-
-        try {
-            Class licenseKeyClass = Class.forName(licenseKeyClassName);
-            Class licenseKeyProductClass = Class.forName(licenseKeyProductClassName);
-            Class licenseKeyProductFeatureClass = Class.forName(licenseKeyFeatureClassName);
-
-            Object licenseKeyProductFeatureArray = Array.newInstance(licenseKeyProductFeatureClass, 0);
-
-            Class[] params = new Class[] {
-                    String.class,
-                    Integer.TYPE,
-                    Integer.TYPE,
-                    licenseKeyProductFeatureArray.getClass()
-            };
-
-            Constructor licenseKeyProductConstructor = licenseKeyProductClass.getConstructor(params);
-
-            Object licenseKeyProductObject = licenseKeyProductConstructor.newInstance(
-                    ZugferdProductInfo.PRODUCT_NAME,
-                    ZugferdProductInfo.MAJOR_VERSION,
-                    ZugferdProductInfo.MINOR_VERSION,
-                    licenseKeyProductFeatureArray
-            );
-
-            Method method = licenseKeyClass.getMethod(checkLicenseKeyMethodName, licenseKeyProductClass);
-            method.invoke(null, licenseKeyProductObject);
-        } catch (Exception e) {
-            if ( ! Version.isAGPLVersion() ) {
-                throw new RuntimeException(e.getCause());
-            }
-        }
         this.zugferdConformanceLevel = getZugferdConformanceLevel(properties);
-        EventCounterHandler.getInstance().onEvent(PdfInvoiceEvent.DOCUMENT, properties.metaInfo, getClass());
     }
 
     /**
@@ -184,7 +138,7 @@ public class ZugferdDocument extends PdfADocument {
             addZugferdRdfDescription(xmpMeta, zugferdConformanceLevel);
         } catch (XMPException e) {
             Logger logger = LoggerFactory.getLogger(ZugferdDocument.class);
-            logger.error(LogMessageConstant.EXCEPTION_WHILE_UPDATING_XMPMETADATA, e);
+            logger.error(IoLogMessageConstant.EXCEPTION_WHILE_UPDATING_XMPMETADATA, e);
         }
     }
 
@@ -201,15 +155,6 @@ public class ZugferdDocument extends PdfADocument {
         } else {
             checker = new ZugferdChecker(conformanceLevel);
         }
-    }
-
-    /* (non-Javadoc)
-     * @see com.itextpdf.pdfa.PdfADocument#getCounters()
-     */
-    @Deprecated
-    @Override
-    protected List<ICounter> getCounters() {
-        return CounterManager.getInstance().getCounters(ZugferdDocument.class);
     }
 
     /**
@@ -243,11 +188,11 @@ public class ZugferdDocument extends PdfADocument {
     private String getZugferdExtension(ZugferdConformanceLevel conformanceLevel) {
         switch (conformanceLevel) {
             case ZUGFeRDBasic:
-                return MessageFormatUtil.format(ZugferdXMPUtil.ZUGFERD_EXTENSION, "BASIC");
+                return MessageFormat.format(ZugferdXMPUtil.ZUGFERD_EXTENSION, "BASIC");
             case ZUGFeRDComfort:
-                return MessageFormatUtil.format(ZugferdXMPUtil.ZUGFERD_EXTENSION, "COMFORT");
+                return MessageFormat.format(ZugferdXMPUtil.ZUGFERD_EXTENSION, "COMFORT");
             case ZUGFeRDExtended:
-                return MessageFormatUtil.format(ZugferdXMPUtil.ZUGFERD_EXTENSION, "EXTENDED");
+                return MessageFormat.format(ZugferdXMPUtil.ZUGFERD_EXTENSION, "EXTENDED");
             default:
                 return null;
         }

@@ -43,7 +43,7 @@
  */
 package com.itextpdf.zugferd;
 
-import com.itextpdf.kernel.counter.event.IMetaInfo;
+import com.itextpdf.commons.actions.contexts.IMetaInfo;
 import com.itextpdf.kernel.pdf.PdfAConformanceLevel;
 import com.itextpdf.kernel.pdf.PdfOutputIntent;
 

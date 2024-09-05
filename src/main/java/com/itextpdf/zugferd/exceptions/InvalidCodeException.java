@@ -42,7 +42,7 @@
  */
 package com.itextpdf.zugferd.exceptions;
 
-import com.itextpdf.io.util.MessageFormatUtil;
+import java.text.MessageFormat;
 
 /**
  * This exception is thrown when you try to create a ZUGFeRD XML file
@@ -61,6 +61,6 @@ public class InvalidCodeException extends Exception {
      * @param context the context
      */
     public InvalidCodeException(String code, String context) {
-        super(MessageFormatUtil.format("{0} is an invalid code for {1}", code, context));
+        super(MessageFormat.format("{0} is an invalid code for {1}", code, context));
     }
 }

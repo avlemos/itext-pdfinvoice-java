@@ -43,8 +43,6 @@
 package com.itextpdf.zugferd;
 
 import com.itextpdf.io.util.ResourceUtil;
-import com.itextpdf.kernel.counter.EventCounterHandler;
-import com.itextpdf.zugferd.events.PdfInvoiceEvent;
 import com.itextpdf.zugferd.exceptions.DataIncompleteException;
 import com.itextpdf.zugferd.exceptions.InvalidCodeException;
 import com.itextpdf.zugferd.profiles.IBasicProfile;
@@ -88,12 +86,6 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-
-import java.lang.reflect.Array;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
-
-import com.itextpdf.kernel.Version;
 
 /**
  * Represents the DOM structure of a ZUGFeRD invoice. It will load the data from the {@link com.itextpdf.zugferd.profiles.IBasicProfile IBasicProfile}
@@ -156,59 +148,6 @@ public class InvoiceDOM {
     public InvoiceDOM(IBasicProfile data)
             throws ParserConfigurationException, SAXException, IOException,
             DataIncompleteException, InvalidCodeException {
-        this(data, new InvoiceProperties());
-    }
-
-    /**
-     * Creates an object that will import data into an XML template.
-     *
-     * @param data If this is an instance of BASICInvoice, the BASIC profile will be used;
-     *             If this is an instance of COMFORTInvoice, the COMFORT profile will be used.
-     * @param properties Invoice properties.
-     * @throws ParserConfigurationException the parser configuration exception
-     * @throws SAXException the SAX exception
-     * @throws IOException Signals that an I/O exception has occurred.
-     * @throws DataIncompleteException the data incomplete exception
-     * @throws InvalidCodeException the invalid code exception
-     */
-    public InvoiceDOM(IBasicProfile data, InvoiceProperties properties)
-            throws ParserConfigurationException, SAXException, IOException,
-            DataIncompleteException, InvalidCodeException {
-        String licenseKeyClassName = "com.itextpdf.licensekey.LicenseKey";
-        String licenseKeyProductClassName = "com.itextpdf.licensekey.LicenseKeyProduct";
-        String licenseKeyFeatureClassName = "com.itextpdf.licensekey.LicenseKeyProductFeature";
-        String checkLicenseKeyMethodName = "scheduledCheck";
-
-        try {
-            Class licenseKeyClass = Class.forName(licenseKeyClassName);
-            Class licenseKeyProductClass = Class.forName(licenseKeyProductClassName);
-            Class licenseKeyProductFeatureClass = Class.forName(licenseKeyFeatureClassName);
-
-            Object licenseKeyProductFeatureArray = Array.newInstance(licenseKeyProductFeatureClass, 0);
-
-            Class[] params = new Class[] {
-                    String.class,
-                    Integer.TYPE,
-                    Integer.TYPE,
-                    licenseKeyProductFeatureArray.getClass()
-            };
-
-            Constructor licenseKeyProductConstructor = licenseKeyProductClass.getConstructor(params);
-
-            Object licenseKeyProductObject = licenseKeyProductConstructor.newInstance(
-                    ZugferdProductInfo.PRODUCT_NAME,
-                    ZugferdProductInfo.MAJOR_VERSION,
-                    ZugferdProductInfo.MINOR_VERSION,
-                    licenseKeyProductFeatureArray
-            );
-
-            Method method = licenseKeyClass.getMethod(checkLicenseKeyMethodName, licenseKeyProductClass);
-            method.invoke(null, licenseKeyProductObject);
-        } catch (Exception e) {
-            if ( ! Version.isAGPLVersion() ) {
-                throw new RuntimeException(e.getCause());
-            }
-        }
         // loading the XML template
         DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
@@ -217,7 +156,6 @@ public class InvoiceDOM {
         doc = docBuilder.parse(is);
         // importing the data
         importData(doc, data);
-        EventCounterHandler.getInstance().onEvent(PdfInvoiceEvent.PROFILE, properties.metaInfo, getClass());
     }
 
     // top-level import methods
